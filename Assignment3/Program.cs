@@ -1,11 +1,30 @@
 ﻿using System;
+using System.Collections;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Assignment3
 {
+    internal class Request
+    {
+        public string Method;
+        public string Path;
+        public string Date;
+        public string Body;
+
+        public Request(string method, string path, string date, string body)
+        {
+            Method = method;
+            Path = path;
+            Date = date;
+            Body = body;
+        }
+    }
+    
+
     internal static class Program
     {
         private static TcpListener _server;
@@ -13,8 +32,27 @@ namespace Assignment3
         private static int _counter;
 
         private static string _data;
+
         // Buffer for reading data
         private static readonly byte[] Bytes = new byte[256];
+
+
+        private static bool IsIn<T>(this T source, params T[] values)
+        {
+            return ((IList) values).Contains(source);
+        }
+
+        private static Response DealWithRequest(Request r)
+        {
+            var resp = Response();
+            if (!r.Method.IsIn("create", "read", "update", "delete", "echo"))
+            {
+                resp.Status = 4;
+                resp.Body = "Illegal method";
+            }
+
+            return resp;
+        }
 
         private static void Main(string[] args)
         {
@@ -60,7 +98,9 @@ namespace Assignment3
             Console.WriteLine("\nHit enter to continue...");
             Console.Read();
         }
-
+        
+       
+        
         private static void HandleClient()
         {
             _data = null;
@@ -78,9 +118,11 @@ namespace Assignment3
 
                 // Process the data sent by the client.
                 _data = _data.ToUpper();
+                var r = JsonConvert.DeserializeObject<Request>(_data);
+
+                var response = DealWithRequest(r);
 
                 var msg = Encoding.ASCII.GetBytes(_data);
-
                 // Send back a response.
                 stream.Write(msg, 0, msg.Length);
                 Console.WriteLine("Sent: {0}", _data);
@@ -89,5 +131,7 @@ namespace Assignment3
             // Shutdown and end connection
             _client.Close();
         }
+
+        
     }
 }
