@@ -18,7 +18,7 @@ namespace Assignment3
 
         static void Main(string[] args)
         {
-            
+
             try
             {
                 // Set the TcpListener on port 5000.
@@ -42,7 +42,7 @@ namespace Assignment3
                     counter += 1;
                     Console.WriteLine("Connected!" + "Client No:" + Convert.ToString(counter));
                     Thread connect = new Thread(HandleClient);
-                    connect.Start();            
+                    connect.Start();
 
                 }
             }
