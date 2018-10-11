@@ -7,16 +7,16 @@ using System.Text;
 
 namespace Assignment3
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             TcpListener server = null;
+            const int port = 5000;
+            var localAddr = IPAddress.Parse("127.0.0.1");
             try
             {
                 // Set the TcpListener on port 5000.
-                Int32 port = 5000;
-                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
 
                 // TcpListener server = new TcpListener(port);
                 server = new TcpListener(localAddr, port);
@@ -25,8 +25,7 @@ namespace Assignment3
                 server.Start();
 
                 // Buffer for reading data
-                Byte[] bytes = new Byte[256];
-                String data = null;
+                var bytes = new byte[256];
 
                 // Enter the listening loop.
                 while (true)
@@ -35,13 +34,11 @@ namespace Assignment3
 
                     // Perform a blocking call to accept requests.
                     // You could also user server.AcceptSocket() here.
-                    TcpClient client = server.AcceptTcpClient();
+                    var client = server.AcceptTcpClient();
                     Console.WriteLine("Connected!");
 
-                    data = null;
-
                     // Get a stream object for reading and writing
-                    NetworkStream stream = client.GetStream();
+                    var stream = client.GetStream();
 
                     int i;
 
@@ -49,13 +46,13 @@ namespace Assignment3
                     while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
                         // Translate data bytes to a ASCII string.
-                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                        var data = Encoding.ASCII.GetString(bytes, 0, i);
                         Console.WriteLine("Received: {0}", data);
 
                         // Process the data sent by the client.
                         data = data.ToUpper();
 
-                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                        var msg = Encoding.ASCII.GetBytes(data);
 
                         // Send back a response.
                         stream.Write(msg, 0, msg.Length);
@@ -73,7 +70,7 @@ namespace Assignment3
             finally
             {
                 // Stop listening for new clients.
-                server.Stop();
+                server?.Stop();
             }
 
 
