@@ -44,10 +44,10 @@ namespace Assignment3
 
         private static Response DealWithRequest(Request r)
         {
-            var resp = Response();
+            var resp = new Response("","");
             if (!r.Method.IsIn("create", "read", "update", "delete", "echo"))
             {
-                resp.Status = 4;
+                resp.Status = "4";
                 resp.Body = "Illegal method";
             }
 
@@ -122,10 +122,9 @@ namespace Assignment3
 
                 var response = DealWithRequest(r);
 
-                var msg = Encoding.ASCII.GetBytes(_data);
                 // Send back a response.
-                stream.Write(msg, 0, msg.Length);
-                Console.WriteLine("Sent: {0}", _data);
+                var data = JsonConvert.SerializeObject(response);
+                stream.Write(Encoding.ASCII.GetBytes(data), 0, data.Length);
             }
 
             // Shutdown and end connection
