@@ -168,9 +168,9 @@ namespace Assignment3 {
             if (id == -1) {
                 return;
             }
-            for (var i = 0; i < Globals.Db.Count; i++) {
-                if (Globals.Db[i].Uid != id) continue;
-                Globals.Db.RemoveAt(i);
+            if (IsIdExists(id))
+            {
+                Globals.Db.RemoveAt(id);
                 resp.Status = "1 Ok";
                 return;
             }
@@ -182,6 +182,16 @@ namespace Assignment3 {
             resp.Body = "";
         }
         // End of cases
+
+        private static bool IsIdExists(int id)
+        {
+            foreach (var t in Globals.Db)
+            {
+                if (t.Uid == id)
+                    return true;
+            }
+            return false;
+        }
         
         /**
          * Check if the path starts with "/categories/" or "/categories"
