@@ -127,9 +127,8 @@ namespace Assignment3 {
         }
         
         private static void CaseCreate(Request r, ref Response resp) {
-            if (r.Path != "/categories")
+            if (IsPathOk(r, ref resp, false) == 1)
             {
-                Console.WriteLine(r.Path);
                 resp.Status = "4 Bad request";
                 resp.Body = "";
                 return;
@@ -191,8 +190,10 @@ namespace Assignment3 {
         /**
          * Check if the path starts with "/categories/"
          */
-        private static int IsPathOk(Request r, ref Response resp) {
-            if (r.Path.StartsWith("/categories/")) {
+        private static int IsPathOk(Request r, ref Response resp, bool full = true)
+        {
+            var url = "/categories" + (full ? "/" : "");
+            if (r.Path.StartsWith(url)) {
                 return 0;
             }
             resp.Status = "4 Bad request";
