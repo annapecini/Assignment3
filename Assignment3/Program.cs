@@ -164,19 +164,16 @@ namespace Assignment3 {
             if (IsPathOk(r, ref resp) == 1) {
                 return;
             }
-
-            var id = -1;
-            try
-            {
+            
+            int id;
+            try {
                 id = Convert.ToInt32(r.Path.Substring(12));
             }
-            catch (FormatException)
-            {
+            catch (FormatException) {
                 resp.Status = "4 Bad request";
                 return;
             }
-            for (var i = 0; i < Globals.Db.Count; i++)
-            {
+            for (var i = 0; i < Globals.Db.Count; i++) {
                 if (Globals.Db[i].Uid != id) continue;
                 Globals.Db.RemoveAt(i);
                 resp.Status = "1 Ok";
