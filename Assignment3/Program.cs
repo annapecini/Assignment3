@@ -55,15 +55,9 @@ namespace Assignment3 {
 
             var reasons = new List<string>();
 
-            if (r.Method == "") {
-                reasons.Add("missing method");
-            }
-            if (r.Path == "") {
-                reasons.Add("missing path");
-            }
-            if (r.Date == 0) {
-                reasons.Add("missing date");
-            }
+            if (r.Method == "") reasons.Add("missing method");
+            if (r.Path == "") reasons.Add("missing path");
+            if (r.Date == 0) reasons.Add("missing date");
 
             if (r.Method != "" && !r.Method.IsIn("create", "read", "update", "delete", "echo")) {
                 reasons.Append("illegal method");
@@ -147,6 +141,12 @@ namespace Assignment3 {
             if (IsPathOk(r, ref resp) == 1) {
                 return;
             }
+            
+            var id = IsIdOk(ref resp);
+            if (id == -1) {
+                return;
+            }           
+            
             var body = JsonConvert.DeserializeObject<Category>(r.Body);
             var cat = new Category {Name = body.Name};
             
@@ -164,13 +164,9 @@ namespace Assignment3 {
             if (IsPathOk(r, ref resp) == 1) {
                 return;
             }
-            
-            int id;
-            try {
-                id = Convert.ToInt32(r.Path.Substring(12));
-            }
-            catch (FormatException) {
-                resp.Status = "4 Bad request";
+
+            var id = IsIdOk(ref resp);
+            if (id == -1) {
                 return;
             }
             for (var i = 0; i < Globals.Db.Count; i++) {
@@ -199,6 +195,16 @@ namespace Assignment3 {
             return 1;
         }
 
+        private static int IsIdOk(ref Response resp) {
+            var id = -1;
+            try {
+                id = Convert.ToInt32(r.Path.Substring(12));
+            } catch (FormatException) {
+                resp.Status = "4 Bad request";
+            }
+
+            return id;
+        }
 
         private static void Main(string[] args) {
 
