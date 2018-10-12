@@ -125,7 +125,16 @@ namespace Assignment3 {
         }
         
         private static void CaseUpdate(Request r, ref Response resp) {
-            
+            var body = JsonConvert.DeserializeObject<Category>(r.Body);
+            var cat = new Category {Uid = Globals.Cid - 1, Name = body.Name};
+
+            if (Globals.Db.Contains(cat)) {
+                resp.Status = "3 Updated";
+            }
+            else {
+                resp.Status = "4 Bad Request";
+            }
+            resp.Body = cat.Name;
         }
         
         private static void CaseDelete(Request r, ref Response resp) {
@@ -133,8 +142,7 @@ namespace Assignment3 {
         }
         
         private static void CaseEcho(ref Response resp) {
-            resp.Status = "1";
-            resp.Body = "Ok";
+            resp.Status = "1 Ok";
         }
         
         // End of cases
