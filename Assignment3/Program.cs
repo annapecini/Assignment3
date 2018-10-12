@@ -55,17 +55,28 @@ namespace Assignment3 {
 
             var reasons = new List<string>();
 
-            if (r.Method == "") reasons.Add("missing method");
-            if (r.Path == "") reasons.Add("missing path");
-            if (r.Date == 0) reasons.Add("missing date");
+            if (r.Method == "") {
+                reasons.Add("missing method");
+            }
+            if (r.Path == "") {
+                reasons.Add("missing path");
+            }
+            if (r.Date == 0) {
+                reasons.Add("missing date");
+            }
 
-            if (r.Method != "" && !r.Method.IsIn("create", "read", "update", "delete", "echo")) reasons.Append("illegal method");
+            if (r.Method != "" && !r.Method.IsIn("create", "read", "update", "delete", "echo")) {
+                reasons.Append("illegal method");
+            }
 
-            if (reasons.Count > 0)
+            if (reasons.Count > 0) {
                 error = "4 ";
+            }
             for (var i = 0; i < reasons.Count; i++)
             {
-                if (i != 0) error = error + ", ";
+                if (i != 0) {
+                    error = error + ", ";
+                }
                 error = error + reasons[i];
             }
             return error;
