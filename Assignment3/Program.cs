@@ -27,7 +27,7 @@ namespace Assignment3 {
         public static List<Category> Db = new List<Category>(); // Modifiable
     }
     
-    internal abstract class Request {
+    internal class Request {
         public string Method { get; set; }
         public string Path { get; set; }
         public double Date { get; set; }
@@ -114,7 +114,6 @@ namespace Assignment3 {
         }
         
         private static void CaseCreate(Request r, ref Response resp) {
-            
             var body = JsonConvert.DeserializeObject<Category>(r.Body);
             
             var cat = new Category {Uid = Globals.Uid++, Name = body.Name};
