@@ -129,7 +129,7 @@ namespace Assignment3 {
                 if (id == -1) {
                     return;
                 }
-                if (IsIdExists(id))
+                if (DoesIdExists(id))
                 {
                     resp.Status = "1 Ok";
                     resp.Body = JsonConvert.SerializeObject(Globals.Db[id]);
@@ -162,16 +162,14 @@ namespace Assignment3 {
             }           
             
             var body = JsonConvert.DeserializeObject<Category>(r.Body);
-            var cat = new Category {Name = body.Name};
-            
-            if (Globals.Db.Contains(cat)) {
+
+            resp.Body = "";
+            if (DoesIdExists(id)) {
+                Globals.Db[id].Name = body.Name;
                 resp.Status = "3 Updated";
-                resp.Body = JsonConvert.SerializeObject(cat);
+                return;
             }
-            else {
-                resp.Status = "4 Bad Request";
-                resp.Body = "";
-            }
+            resp.Status = "4 Bad Request";
         }
         
         private static void CaseDelete(Request r, ref Response resp) {
@@ -183,8 +181,9 @@ namespace Assignment3 {
             if (id == -1) {
                 return;
             }
-            if (IsIdExists(id))
-            {
+
+            resp.Body = "";
+            if (DoesIdExists(id)) {
                 Globals.Db.RemoveAt(id);
                 resp.Status = "1 Ok";
                 return;
@@ -198,7 +197,10 @@ namespace Assignment3 {
         }
         // End of cases
 
-        private static bool IsIdExists(int id)
+        /**
+         * Check if id is in the database
+         */
+        private static bool DoesIdExists(int id)
         {
             foreach (var t in Globals.Db)
             {
