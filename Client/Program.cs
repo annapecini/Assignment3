@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Client
 {
@@ -8,10 +9,11 @@ namespace Client
     {
         public static double DateToUnixTimestamp(string date)
         {
-            var thTH = new System.Globalization.CultureInfo("th-TH");
-            var value = DateTime.Parse( date, thTH);
-            return (TimeZoneInfo.ConvertTimeToUtc(value) -
-                   new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc)).TotalSeconds;
+            string format = "dd/MM/yyyy";
+            CultureInfo provider = CultureInfo.InvariantCulture;
+            var value = DateTime.ParseExact( date, format, provider);
+            return (new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc)-
+                    TimeZoneInfo.ConvertTimeToUtc(value)).TotalSeconds;
         }
 
         private static void Main(string[] args)

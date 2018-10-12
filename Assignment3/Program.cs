@@ -20,7 +20,7 @@ namespace Assignment3
     {
         public string Method { get; set; }
         public string Path { get; set; }
-        public string Date { get; set; }
+        public double Date { get; set; }
         public string Body { get; set; }
 
         //public Request(string method, string path, string date, string body)
@@ -58,7 +58,7 @@ namespace Assignment3
 
             if (r.Method == "") reasons.Add("missing method");
             if (r.Path == "") reasons.Add("missing path");
-            if (r.Date == "") reasons.Add("missing date");
+            if (r.Date == 0) reasons.Add("missing date");
 
             if (r.Method != "" && !r.Method.IsIn("CREATE", "READ", "UPDATE", "DELETE", "ECHO")) reasons.Append("illegal method");
 
