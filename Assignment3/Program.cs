@@ -60,7 +60,7 @@ namespace Assignment3
             if (r.Path == "") reasons.Add("missing path");
             if (r.Date == "") reasons.Add("missing date");
 
-            if (r.Method != "" && !r.Method.IsIn("create", "read", "update", "delete", "echo")) reasons.Append("illegal method");
+            if (r.Method != "" && !r.Method.IsIn("CREATE", "READ", "UPDATE", "DELETE", "ECHO")) reasons.Append("illegal method");
 
             for (var i = 0; i < reasons.Count; i++)
             {
@@ -82,7 +82,24 @@ namespace Assignment3
                 resp.Body = err;
                 return resp;
             }
-            
+
+            switch (r.Method) {
+                case "CREATE":
+                    Console.WriteLine("Entering create");
+                    break;
+                case "READ":
+                    Console.WriteLine("Entering read");
+                    break;
+                case "UPDATE":
+                    Console.WriteLine("Entering update");
+                    break;
+                case "DELETE":
+                    Console.WriteLine("Entering delete");
+                    break;
+                case "ECHO":
+                    Console.WriteLine("Entering echo");
+                    break;
+            }
             return resp;
         }
 
