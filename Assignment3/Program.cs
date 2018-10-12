@@ -144,25 +144,27 @@ namespace Assignment3 {
         }
         
         private static void CaseUpdate(Request r, ref Response resp) {
+            if (IsPathOk(r, ref resp) == 1) {
+                return;
+            }
             var body = JsonConvert.DeserializeObject<Category>(r.Body);
-            var cat = new Category {Uid = Globals.Cid - 1, Name = body.Name};
-
+            var cat = new Category {Name = body.Name};
+            
             if (Globals.Db.Contains(cat)) {
                 resp.Status = "3 Updated";
+                resp.Body = JsonConvert.SerializeObject(cat);
             }
             else {
                 resp.Status = "4 Bad Request";
+                resp.Body = "";
             }
-            resp.Body = cat.Name;
         }
         
         private static void CaseDelete(Request r, ref Response resp) {
-            if (!r.Path.StartsWith("/categories/"))
-            {
-                resp.Status = "4 Bad request";
+            if (IsPathOk(r, ref resp) == 1) {
                 return;
             }
-
+            
             var id = System.Convert.ToInt32(r.Path.Substring(12));
             for (var i = 0; i < Globals.Db.Count; i++)
             {
@@ -178,8 +180,19 @@ namespace Assignment3 {
             resp.Status = "1 Ok";
             resp.Body = "";
         }
-        
         // End of cases
+        
+        /**
+         * Check if the path starts with "/categories/"
+         */
+        private static int IsPathOk(Request r, ref Response resp) {
+            if (r.Path.StartsWith("/categories/")) {
+                return 0;
+            }
+            resp.Status = "4 Bad request";
+            return 1;
+        }
+
 
         private static void Main(string[] args) {
 
