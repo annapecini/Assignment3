@@ -62,6 +62,16 @@ namespace Assignment3
                 resp.Status = "4";
                 resp.Body = "Missing method";
             }
+            else if ( r.Path == "")
+            {
+                resp.Status = "4";
+                resp.Body = "Missing path";
+            }
+            else if ( r.Date == "")
+            {
+                resp.Status = "4";
+                resp.Body = "Missing date";
+            }
             return resp;
         }
 
@@ -83,7 +93,7 @@ namespace Assignment3
                 // Enter the listening loop.
                 while (true)
                 {
-                    Console.Write("Waiting for a connection... ");
+                    Console.WriteLine("Waiting for a connection... ");
 
                     // Perform a blocking call to accept requests.
                     // You could also user server.AcceptSocket() here.
