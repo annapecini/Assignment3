@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Client": {
+      "commandName": "Project",
+      "commandLineArgs": "\"127.0.0.1\" \"{ \\\"method\\\": \\\"Bonjour\\\", \\\"path\\\": \\\"Bonjour\\\", \\\"date\\\": \\\"Bonjour\\\", \\\"body\\\": \\\"Bonjour\\\" }\""
+    }
+  }
+}

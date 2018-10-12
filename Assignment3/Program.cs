@@ -8,20 +8,26 @@ using Newtonsoft.Json;
 
 namespace Assignment3
 {
+    internal class Response
+    {
+        public string Status { get; set; }
+        public string Body { get; set; }
+
+    }
     internal class Request
     {
-        public string Method;
-        public string Path;
-        public string Date;
-        public string Body;
+        public string Method { get; set; }
+        public string Path { get; set; }
+        public string Date { get; set; }
+        public string Body { get; set; }
 
-        public Request(string method, string path, string date, string body)
-        {
-            Method = method;
-            Path = path;
-            Date = date;
-            Body = body;
-        }
+        //public Request(string method, string path, string date, string body)
+        //{
+        //    Method = method;
+        //    Path = path;
+        //    Date = date;
+        //    Body = body;
+        //}
     }
     
 
@@ -44,13 +50,18 @@ namespace Assignment3
 
         private static Response DealWithRequest(Request r)
         {
-            var resp = new Response("","");
+            var resp = new Response();
             if (!r.Method.IsIn("create", "read", "update", "delete", "echo"))
             {
                 resp.Status = "4";
                 resp.Body = "Illegal method";
             }
 
+            else if ( r.Method == "")
+            {
+                resp.Status = "4";
+                resp.Body = "Missing method";
+            }
             return resp;
         }
 
