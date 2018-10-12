@@ -52,7 +52,7 @@ namespace Client
                         Body = body
                     }));
                     stream.Write(data, 0, data.Length);
-                    Console.WriteLine("Sent: {0}", args[1]);
+                    Console.WriteLine("Sent: {0}", data);
 
                     // Receive the TcpServer.response.
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -48,30 +50,39 @@ namespace Assignment3
             return ((IList) values).Contains(source);
         }
 
+        private static string checkError(Request r)
+        {
+            string error = null;
+
+            var reasons = new List<string>();
+
+            if (r.Method == "") reasons.Add("missing method");
+            if (r.Path == "") reasons.Add("missing path");
+            if (r.Date == "") reasons.Add("missing date");
+
+            if (r.Method != "" && !r.Method.IsIn("create", "read", "update", "delete", "echo")) reasons.Append("illegal method");
+
+            for (var i = 0; i < reasons.Count; i++)
+            {
+                if (i != 0) error = error + ", ";
+                error = error + reasons[i];
+            }
+            Console.WriteLine("error : {0}", error );
+            return error;
+        }
+        
         private static Response DealWithRequest(Request r)
         {
             var resp = new Response();
-            if (!r.Method.IsIn("create", "read", "update", "delete", "echo"))
+            string err;
+            
+            if ((err = checkError(r)) != null)
             {
                 resp.Status = "4";
-                resp.Body = "Illegal method";
+                resp.Body = err;
+                return resp;
             }
-
-            else if ( r.Method == "")
-            {
-                resp.Status = "4";
-                resp.Body = "Missing method";
-            }
-            else if ( r.Path == "")
-            {
-                resp.Status = "4";
-                resp.Body = "Missing path";
-            }
-            else if ( r.Date == "")
-            {
-                resp.Status = "4";
-                resp.Body = "Missing date";
-            }
+            
             return resp;
         }
 
