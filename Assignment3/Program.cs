@@ -23,7 +23,7 @@ namespace Assignment3 {
     
     public static class Globals
     {
-        public static int Uid = 0;
+        public static int Cid = 0;
         public static List<Category> Db = new List<Category>(); // Modifiable
     }
     
@@ -114,9 +114,11 @@ namespace Assignment3 {
         }
         
         private static void CaseCreate(Request r, ref Response resp) {
-            var body = JsonConvert.DeserializeObject<Category>(r.Body);
             
-            var cat = new Category {Uid = Globals.Uid++, Name = body.Name};
+            
+            var body = JsonConvert.DeserializeObject<Category>(r.Body);
+            Interlocked.Increment(ref Globals.Cid);
+            var cat = new Category {Uid = Globals.Cid - 1, Name = body.Name};
             Globals.Db.Add(cat);
             resp.Status = cat.Uid.ToString();
             resp.Body = cat.Name;
