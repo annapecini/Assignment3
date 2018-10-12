@@ -141,8 +141,8 @@ namespace Assignment3 {
         }
         
         private static void CaseEcho(ref Response resp) {
-            resp.Status = "1";
-            resp.Body = "Ok";
+            resp.Status = "1 Ok";
+            resp.Body = "";
         }
         
         // End of cases
