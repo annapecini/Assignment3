@@ -10,30 +10,6 @@ using Newtonsoft.Json;
 
 namespace Assignment3 {
 
-    internal class Response {
-        public string Status { get; set; }
-        public string Body { get; set; }
-    }
-
-    public class Category
-    {
-        public int Uid { get; set; }
-        public string Name { get; set; }
-    }
-    
-    public static class Globals
-    {
-        public static int Cid = 0;
-        public static List<Category> Db = new List<Category>(); // Modifiable
-    }
-    
-    internal class Request {
-        public string Method { get; set; }
-        public string Path { get; set; }
-        public double Date { get; set; }
-        public string Body { get; set; }
-    }
-    
     internal static class Program {
   
         private static TcpListener _server;
@@ -155,14 +131,12 @@ namespace Assignment3 {
             if (IsPathOk(r, ref resp) == 1) {
                 return;
             }
-            
             var id = IsIdOk(r, ref resp);
             if (id == -1) {
                 return;
             }           
             
             var body = JsonConvert.DeserializeObject<Category>(r.Body);
-
             resp.Body = "";
             if (DoesIdExists(id)) {
                 Globals.Db[id].Name = body.Name;
