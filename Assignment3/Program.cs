@@ -141,7 +141,7 @@ namespace Assignment3 {
                 return;
             }
             
-            var id = IsIdOk(ref resp);
+            var id = IsIdOk(r, ref resp);
             if (id == -1) {
                 return;
             }           
@@ -164,7 +164,7 @@ namespace Assignment3 {
                 return;
             }
 
-            var id = IsIdOk(ref resp);
+            var id = IsIdOk(r, ref resp);
             if (id == -1) {
                 return;
             }
@@ -185,7 +185,7 @@ namespace Assignment3 {
         
         /**
          * Check if the path starts with "/categories/" or "/categories"
-         * The 'bool full' is used to check if there is a "/" after "caterogies" or not
+         * The 'bool full' is used to check if there is a "/" after "categories" or not
          */
         private static int IsPathOk(Request r, ref Response resp, bool full = true)
         {
