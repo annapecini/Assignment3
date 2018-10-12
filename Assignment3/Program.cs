@@ -184,7 +184,8 @@ namespace Assignment3 {
         // End of cases
         
         /**
-         * Check if the path starts with "/categories/"
+         * Check if the path starts with "/categories/" or "/categories"
+         * The 'bool full' is used to check if there is a "/" after "caterogies" or not
          */
         private static int IsPathOk(Request r, ref Response resp, bool full = true)
         {
@@ -196,8 +197,12 @@ namespace Assignment3 {
             return 1;
         }
 
-        private static int IsIdOk(ref Response resp) {
+        /**
+         * Check if the path contains an id and if this id is only numeric
+         */
+        private static int IsIdOk(Request r, ref Response resp) {
             var id = -1;
+            
             try {
                 id = Convert.ToInt32(r.Path.Substring(12));
             } catch (FormatException) {
