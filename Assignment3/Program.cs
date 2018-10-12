@@ -59,8 +59,10 @@ namespace Assignment3 {
             if (r.Path == "") reasons.Add("missing path");
             if (r.Date == 0) reasons.Add("missing date");
 
-            if (r.Method != "" && !r.Method.IsIn("CREATE", "READ", "UPDATE", "DELETE", "ECHO")) reasons.Append("illegal method");
+            if (r.Method != "" && !r.Method.IsIn("create", "read", "update", "delete", "echo")) reasons.Append("illegal method");
 
+            if (reasons.Count > 0)
+                error = "4 ";
             for (var i = 0; i < reasons.Count; i++)
             {
                 if (i != 0) error = error + ", ";
@@ -78,25 +80,25 @@ namespace Assignment3 {
             Console.WriteLine(dateTime.ToShortDateString());            
 
             if ((err = CheckError(r)) != null) {
-                resp.Status = "4";
-                resp.Body = err;
+                resp.Status = err;
+                resp.Body = "";
                 return resp;
             }
 
             switch (r.Method) {
-                case "CREATE":
+                case "create":
                     CaseCreate(r, ref resp);
                     break;
-                case "READ":
+                case "read":
                     CaseRead(r, ref resp);
                     break;
-                case "UPDATE":
+                case "update":
                     CaseUpdate(r, ref resp);
                     break;
-                case "DELETE":
+                case "delete":
                     CaseDelete(r, ref resp);
                     break;
-                case "ECHO":
+                case "echo":
                     CaseEcho(ref resp);
                     break;
             }
@@ -114,14 +116,20 @@ namespace Assignment3 {
         }
         
         private static void CaseCreate(Request r, ref Response resp) {
-            
+            if (r.Path != "/categories")
+            {
+                Console.WriteLine(r.Path);
+                resp.Status = "4 Bad request";
+                resp.Body = "";
+                return;
+            }
             
             var body = JsonConvert.DeserializeObject<Category>(r.Body);
             Interlocked.Increment(ref Globals.Cid);
             var cat = new Category {Uid = Globals.Cid - 1, Name = body.Name};
             Globals.Db.Add(cat);
-            resp.Status = cat.Uid.ToString();
-            resp.Body = cat.Name;
+            resp.Status = "2 Created";
+            resp.Body = JsonConvert.SerializeObject(cat);
         }
         
         private static void CaseUpdate(Request r, ref Response resp) {
@@ -143,6 +151,7 @@ namespace Assignment3 {
         
         private static void CaseEcho(ref Response resp) {
             resp.Status = "1 Ok";
+            resp.Body = "";
         }
         
         // End of cases
@@ -201,7 +210,6 @@ namespace Assignment3 {
                 Console.WriteLine("Received: {0}", _data);
 
                 // Process the data sent by the client.
-                _data = _data.ToUpper();
                 var r = JsonConvert.DeserializeObject<Request>(_data);
 
                 var response = DealWithRequest(r);
