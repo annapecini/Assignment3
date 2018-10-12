@@ -6,6 +6,14 @@ namespace Client
 {
     internal static class Program
     {
+        public static double DateToUnixTimestamp(string date)
+        {
+            var thTH = new System.Globalization.CultureInfo("th-TH");
+            var value = DateTime.Parse( date, thTH);
+            return (TimeZoneInfo.ConvertTimeToUtc(value) -
+                   new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc)).TotalSeconds;
+        }
+
         private static void Main(string[] args)
         {
             try 
@@ -39,7 +47,8 @@ namespace Client
                     {
                         Method = method,
                         Path = path,
-                        Date = date,
+                        // Convert date input to UNIX timestamp
+                        Date = DateToUnixTimestamp(date),
                         Body = body
                     }));
                     stream.Write(data, 0, data.Length);
