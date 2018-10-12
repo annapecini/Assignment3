@@ -9,11 +9,10 @@ namespace Client
     {
         public static double DateToUnixTimestamp(string date)
         {
-            string format = "dd/MM/yyyy";
-            CultureInfo provider = CultureInfo.InvariantCulture;
+            const string format = "dd/MM/yyyy";
+            var provider = CultureInfo.InvariantCulture;
             var value = DateTime.ParseExact( date, format, provider);
-            return (new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc)-
-                    TimeZoneInfo.ConvertTimeToUtc(value)).TotalSeconds;
+            return (value - new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc)).TotalSeconds;
         }
 
         private static void Main(string[] args)

@@ -9,25 +9,29 @@ using System.Threading;
 using Newtonsoft.Json;
 
 namespace Assignment3 {
-    
+
     internal class Response {
         public string Status { get; set; }
         public string Body { get; set; }
     }
+
+    public class Category
+    {
+        public int Uid { get; set; }
+        public string Name { get; set; }
+    }
     
-    internal class Request {
+    public static class Globals
+    {
+        public static int Uid = 0;
+        public static List<Category> Db = new List<Category>(); // Modifiable
+    }
+    
+    internal abstract class Request {
         public string Method { get; set; }
         public string Path { get; set; }
         public double Date { get; set; }
         public string Body { get; set; }
-
-        //public Request(string method, string path, string date, string body)
-        //{
-        //    Method = method;
-        //    Path = path;
-        //    Date = date;
-        //    Body = body;
-        //}
     }
     
     internal static class Program {
@@ -46,7 +50,7 @@ namespace Assignment3 {
             return ((IList) values).Contains(source);
         }
 
-        private static string checkError(Request r) {
+        private static string CheckError(Request r) {
             string error = null;
 
             var reasons = new List<string>();
@@ -62,7 +66,6 @@ namespace Assignment3 {
                 if (i != 0) error = error + ", ";
                 error = error + reasons[i];
             }
-            Console.WriteLine("error : {0}", error );
             return error;
         }
         
@@ -70,7 +73,11 @@ namespace Assignment3 {
             var resp = new Response();
             string err;
             
-            if ((err = checkError(r)) != null) {
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(r.Date);
+            Console.WriteLine(dateTime.ToShortDateString());            
+
+            if ((err = CheckError(r)) != null) {
                 resp.Status = "4";
                 resp.Body = err;
                 return resp;
@@ -78,24 +85,19 @@ namespace Assignment3 {
 
             switch (r.Method) {
                 case "CREATE":
-                    Console.WriteLine("Entering create");
                     CaseCreate(r, ref resp);
                     break;
                 case "READ":
-                    Console.WriteLine("Entering read");
                     CaseRead(r, ref resp);
                     break;
                 case "UPDATE":
-                    Console.WriteLine("Entering update");
                     CaseUpdate(r, ref resp);
                     break;
                 case "DELETE":
-                    Console.WriteLine("Entering delete");
                     CaseDelete(r, ref resp);
                     break;
                 case "ECHO":
                     CaseEcho(ref resp);
-                    Console.WriteLine(resp.Body);
                     break;
             }
             return resp;
@@ -113,6 +115,12 @@ namespace Assignment3 {
         
         private static void CaseCreate(Request r, ref Response resp) {
             
+            var body = JsonConvert.DeserializeObject<Category>(r.Body);
+            
+            var cat = new Category {Uid = Globals.Uid++, Name = body.Name};
+            Globals.Db.Add(cat);
+            resp.Status = cat.Uid.ToString();
+            resp.Body = cat.Name;
         }
         
         private static void CaseUpdate(Request r, ref Response resp) {
