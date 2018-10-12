@@ -80,9 +80,8 @@ namespace Assignment3 {
             var resp = new Response();
             string err;
             
-            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            dateTime = dateTime.AddSeconds(r.Date);
-            Console.WriteLine(dateTime.ToShortDateString());            
+//            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+//            dateTime = dateTime.AddSeconds(r.Date);
 
             if ((err = CheckError(r)) != null) {
                 resp.Status = err;
@@ -117,16 +116,32 @@ namespace Assignment3 {
         // Different cases
         
         private static void CaseRead(Request r, ref Response resp) {
-            
+            if (IsPathOk(r, ref resp, false) == 1)
+                return;
+            if (r.Path == "/categories")
+            {
+                resp.Status = "1 Ok";
+                resp.Body = JsonConvert.SerializeObject(Globals.Db);
+            }
+            else
+            {
+                var id = IsIdOk(r, ref resp);
+                if (id == -1) {
+                    return;
+                }
+                if (IsIdExists(id))
+                {
+                    resp.Status = "1 Ok";
+                    resp.Body = JsonConvert.SerializeObject(Globals.Db[id]);
+                    return;
+                }
+                resp.Status = "5 Not found";
+            }
         }
         
         private static void CaseCreate(Request r, ref Response resp) {
             if (IsPathOk(r, ref resp, false) == 1)
-            {
-                resp.Status = "4 Bad request";
-                resp.Body = "";
                 return;
-            }
             
             var body = JsonConvert.DeserializeObject<Category>(r.Body);
             Interlocked.Increment(ref Globals.Cid);
