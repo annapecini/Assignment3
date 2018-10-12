@@ -8,16 +8,14 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 
-namespace Assignment3
-{
-    internal class Response
-    {
+namespace Assignment3 {
+    
+    internal class Response {
         public string Status { get; set; }
         public string Body { get; set; }
-
     }
-    internal class Request
-    {
+    
+    internal class Request {
         public string Method { get; set; }
         public string Path { get; set; }
         public double Date { get; set; }
@@ -32,9 +30,8 @@ namespace Assignment3
         //}
     }
     
-
-    internal static class Program
-    {
+    internal static class Program {
+  
         private static TcpListener _server;
         private static TcpClient _client;
         private static int _counter;
@@ -45,13 +42,11 @@ namespace Assignment3
         private static readonly byte[] Bytes = new byte[256];
 
 
-        private static bool IsIn<T>(this T source, params T[] values)
-        {
+        private static bool IsIn<T>(this T source, params T[] values) {
             return ((IList) values).Contains(source);
         }
 
-        private static string checkError(Request r)
-        {
+        private static string checkError(Request r) {
             string error = null;
 
             var reasons = new List<string>();
@@ -71,13 +66,11 @@ namespace Assignment3
             return error;
         }
         
-        private static Response DealWithRequest(Request r)
-        {
+        private static Response DealWithRequest(Request r) {
             var resp = new Response();
             string err;
             
-            if ((err = checkError(r)) != null)
-            {
+            if ((err = checkError(r)) != null) {
                 resp.Status = "4";
                 resp.Body = err;
                 return resp;
@@ -86,28 +79,60 @@ namespace Assignment3
             switch (r.Method) {
                 case "CREATE":
                     Console.WriteLine("Entering create");
+                    CaseCreate(r, ref resp);
                     break;
                 case "READ":
                     Console.WriteLine("Entering read");
+                    CaseRead(r, ref resp);
                     break;
                 case "UPDATE":
                     Console.WriteLine("Entering update");
+                    CaseUpdate(r, ref resp);
                     break;
                 case "DELETE":
                     Console.WriteLine("Entering delete");
+                    CaseDelete(r, ref resp);
                     break;
                 case "ECHO":
-                    Console.WriteLine("Entering echo");
+                    CaseEcho(ref resp);
+                    Console.WriteLine(resp.Body);
                     break;
             }
             return resp;
         }
+        
+        /**
+         * The Response resp if passed by reference so we don't have to return it in every functions
+         */
+        
+        // Different cases
+        
+        private static void CaseRead(Request r, ref Response resp) {
+            
+        }
+        
+        private static void CaseCreate(Request r, ref Response resp) {
+            
+        }
+        
+        private static void CaseUpdate(Request r, ref Response resp) {
+            
+        }
+        
+        private static void CaseDelete(Request r, ref Response resp) {
+            
+        }
+        
+        private static void CaseEcho(ref Response resp) {
+            resp.Status = "1";
+            resp.Body = "Ok";
+        }
+        
+        // End of cases
 
-        private static void Main(string[] args)
-        {
+        private static void Main(string[] args) {
 
-            try
-            {
+            try {
                 // Set the TcpListener on port 5000.
                 const int port = 5000;
                 var localAddr = IPAddress.Parse("127.0.0.1");
@@ -119,8 +144,7 @@ namespace Assignment3
                 _server.Start();
 
                 // Enter the listening loop.
-                while (true)
-                {
+                while (true) {
                     Console.WriteLine("Waiting for a connection... ");
 
                     // Perform a blocking call to accept requests.
@@ -133,12 +157,10 @@ namespace Assignment3
 
                 }
             }
-            catch (SocketException e)
-            {
+            catch (SocketException e) {
                 Console.WriteLine("SocketException: {0}", e);
             }
-            finally
-            {
+            finally {
                 // Stop listening for new clients.
                 _server.Stop();
             }
@@ -148,10 +170,7 @@ namespace Assignment3
             Console.Read();
         }
         
-       
-        
-        private static void HandleClient()
-        {
+        private static void HandleClient() {
             _data = null;
             // Get a stream object for reading and writing
             var stream = _client.GetStream();
@@ -159,8 +178,7 @@ namespace Assignment3
             int i;
 
             // Loop to receive all the data sent by the client.
-            while ((i = stream.Read(Bytes, 0, Bytes.Length)) != 0)
-            {
+            while ((i = stream.Read(Bytes, 0, Bytes.Length)) != 0) {
                 // Translate data bytes to a ASCII string.
                 _data = Encoding.ASCII.GetString(Bytes, 0, i);
                 Console.WriteLine("Received: {0}", _data);
@@ -179,7 +197,5 @@ namespace Assignment3
             // Shutdown and end connection
             _client.Close();
         }
-
-        
     }
 }
