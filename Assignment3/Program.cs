@@ -157,7 +157,21 @@ namespace Assignment3 {
         }
         
         private static void CaseDelete(Request r, ref Response resp) {
-            
+            if (!r.Path.StartsWith("/categories/"))
+            {
+                resp.Status = "4 Bad request";
+                return;
+            }
+
+            var id = System.Convert.ToInt32(r.Path.Substring(12));
+            for (var i = 0; i < Globals.Db.Count; i++)
+            {
+                if (Globals.Db[i].Uid != id) continue;
+                Globals.Db.RemoveAt(i);
+                resp.Status = "1 Ok";
+                return;
+            }
+            resp.Status = "5 Not found";
         }
         
         private static void CaseEcho(ref Response resp) {
