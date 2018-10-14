@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Assignment3 {
 
@@ -31,12 +33,51 @@ namespace Assignment3 {
 
             var reasons = new List<string>();
 
-            if (r.Method == "") reasons.Add("missing method");
-            if (r.Path == "") reasons.Add("missing path");
-            if (r.Date == 0) reasons.Add("missing date");
+            if (string.IsNullOrEmpty(r.Method)) reasons.Add("missing method");
+            if (r.Method != "echo" && string.IsNullOrEmpty(r.Path)) reasons.Add("missing resource");
+            if (string.IsNullOrEmpty(r.Date)) reasons.Add("missing date");
+            try
+            {
+                Convert.ToDouble(r.Date);
+            }
+            catch (Exception e)
+            {
+                reasons.Add("illegal date");
+            }
+            
 
-            if (r.Method != "" && !r.Method.IsIn("create", "read", "update", "delete", "echo")) {
-                reasons.Append("illegal method");
+            if (!string.IsNullOrEmpty(r.Method) && r.Method != "" && !r.Method.IsIn("create", "read", "update", "delete", "echo")) {
+                reasons.Add("illegal method");
+            }
+            
+            if (r.Method.IsIn("create", "update", "echo"))
+            {
+                
+                if (string.IsNullOrEmpty(r.Body))
+                    reasons.Add("missing body");
+                else if (r.Method.IsIn("create", "update"))
+                {
+                    switch (r.Method)
+                    {
+                        case "create" when reasons.Count == 0 && !string.IsNullOrEmpty(r.Path) && r.Path.Length != "/api/categories".Length:
+                        case "update" when reasons.Count == 0 && !string.IsNullOrEmpty(r.Path) && r.Path.Length <= "/api/categories/".Length:
+                            return "4 Bad Request";
+                        default:
+                            try
+                            {
+                                var body = JsonConvert.DeserializeObject<Category>(r.Body);
+                                if (string.IsNullOrEmpty(body.Cid.ToString()) || string.IsNullOrEmpty(body.Name))
+                                    reasons.Add("illegal body");
+                            }
+                            catch (JsonReaderException)
+                            {
+                                reasons.Add("illegal body");
+                            }
+
+                            break;
+                    }
+                }
+                
             }
 
             if (reasons.Count > 0) {
@@ -45,9 +86,9 @@ namespace Assignment3 {
             for (var i = 0; i < reasons.Count; i++)
             {
                 if (i != 0) {
-                    error = error + ", ";
+                    error += ", ";
                 }
-                error = error + reasons[i];
+                error += reasons[i];
             }
             return error;
         }
@@ -61,7 +102,7 @@ namespace Assignment3 {
 
             if ((err = CheckError(r)) != null) {
                 resp.Status = err;
-                resp.Body = "";
+//                resp.Body = "";
                 return resp;
             }
 
@@ -79,7 +120,7 @@ namespace Assignment3 {
                     CaseDelete(r, ref resp);
                     break;
                 case "echo":
-                    CaseEcho(ref resp);
+                    CaseEcho(r, ref resp);
                     break;
             }
             return resp;
@@ -94,7 +135,7 @@ namespace Assignment3 {
         private static void CaseRead(Request r, ref Response resp) {
             if (IsPathOk(r, ref resp, false) == 1)
                 return;
-            if (r.Path == "/categories")
+            if (r.Path == "/api/categories")
             {
                 resp.Status = "1 Ok";
                 resp.Body = JsonConvert.SerializeObject(Globals.Db);
@@ -108,42 +149,65 @@ namespace Assignment3 {
                 if (DoesIdExists(id))
                 {
                     resp.Status = "1 Ok";
-                    resp.Body = JsonConvert.SerializeObject(Globals.Db[id]);
+                    resp.Body = JsonConvert.SerializeObject(GetCategory(id));
                     return;
                 }
                 resp.Status = "5 Not found";
             }
         }
         
-        private static void CaseCreate(Request r, ref Response resp) {
-            if (IsPathOk(r, ref resp, false) == 1)
+        private static void CaseCreate(Request r, ref Response resp) {            
+            if (IsPathOk(r, ref resp, false, true) == 1)
                 return;
-            
+
             var body = JsonConvert.DeserializeObject<Category>(r.Body);
             Interlocked.Increment(ref Globals.Cid);
-            var cat = new Category {Uid = Globals.Cid - 1, Name = body.Name};
+            var cat = new Category {Cid = Globals.Cid - 1, Name = body.Name};
             Globals.Db.Add(cat);
             resp.Status = "2 Created";
             resp.Body = JsonConvert.SerializeObject(cat);
         }
-        
-        private static void CaseUpdate(Request r, ref Response resp) {
-            if (IsPathOk(r, ref resp) == 1) {
+
+        private static void CaseUpdate(Request r, ref Response resp)
+        {
+            if (IsPathOk(r, ref resp) == 1)
+            {
                 return;
             }
+
             var id = IsIdOk(r, ref resp);
-            if (id == -1) {
-                return;
-            }           
-            
-            var body = JsonConvert.DeserializeObject<Category>(r.Body);
-            resp.Body = "";
-            if (DoesIdExists(id)) {
-                Globals.Db[id].Name = body.Name;
-                resp.Status = "3 Updated";
+            if (id == -1)
+            {
+                resp.Status = "5 Not found";
                 return;
             }
-            resp.Status = "4 Bad Request";
+
+            try
+            {
+                var body = JsonConvert.DeserializeObject<Category>(r.Body);
+                resp.Body = "";
+                if (!DoesIdExists(id))
+                {
+                    resp.Status = "5 Not found";
+                    return;
+                }
+                GetCategory(id).Name = body.Name;
+                resp.Status = "3 Updated";
+            }
+            catch (JsonReaderException)
+            {
+                resp.Status = "4 Bad Request";
+            }
+        }
+
+        private static Category GetCategory(int id)
+        {
+            foreach (var t in Globals.Db)
+            {
+                if (t.Cid == id)
+                    return t;
+            }
+            return null;
         }
         
         private static void CaseDelete(Request r, ref Response resp) {
@@ -153,21 +217,22 @@ namespace Assignment3 {
 
             var id = IsIdOk(r, ref resp);
             if (id == -1) {
+                resp.Status = "5 Not found";
                 return;
             }
 
             resp.Body = "";
             if (DoesIdExists(id)) {
-                Globals.Db.RemoveAt(id);
+                Globals.Db.RemoveAt(Globals.Db.IndexOf(GetCategory(id)));
                 resp.Status = "1 Ok";
                 return;
             }
             resp.Status = "5 Not found";
         }
         
-        private static void CaseEcho(ref Response resp) {
+        private static void CaseEcho(Request r, ref Response resp) {
             resp.Status = "1 Ok";
-            resp.Body = "";
+            resp.Body = r.Body;
         }
         // End of cases
 
@@ -178,7 +243,7 @@ namespace Assignment3 {
         {
             foreach (var t in Globals.Db)
             {
-                if (t.Uid == id)
+                if (t.Cid == id)
                     return true;
             }
             return false;
@@ -188,11 +253,14 @@ namespace Assignment3 {
          * Check if the path starts with "/categories/" or "/categories"
          * The 'bool full' is used to check if there is a "/" after "categories" or not
          */
-        private static int IsPathOk(Request r, ref Response resp, bool full = true)
+        private static int IsPathOk(Request r, ref Response resp, bool full = true, bool strict = false)
         {
-            var url = "/categories" + (full ? "/" : "");
+            var url = "/api/categories" + (full ? "/" : "");
             if (r.Path.StartsWith(url)) {
-                return 0;
+                if (!strict) return 0;
+                Console.WriteLine(r.Path.Length);
+                if (r.Path.Length == 15)
+                    return 0;
             }
             resp.Status = "4 Bad request";
             return 1;
@@ -205,7 +273,7 @@ namespace Assignment3 {
             var id = -1;
             
             try {
-                id = Convert.ToInt32(r.Path.Substring(12));
+                id = Convert.ToInt32(r.Path.Substring(16));
             } catch (FormatException) {
                 resp.Status = "4 Bad request";
             }
@@ -213,7 +281,7 @@ namespace Assignment3 {
             return id;
         }
 
-        private static void Main(string[] args) {
+        public static void Main(string[] args) {
 
             try {
                 // Set the TcpListener on port 5000.
@@ -237,7 +305,6 @@ namespace Assignment3 {
                     Console.WriteLine("Connected!" + "Client No:" + Convert.ToString(_counter));
                     var connect = new Thread(HandleClient);
                     connect.Start();
-
                 }
             }
             catch (SocketException e) {
@@ -245,8 +312,8 @@ namespace Assignment3 {
             }
             finally {
                 // Stop listening for new clients.
-                _server.Stop();
             }
+                _server.Stop();
 
 
             Console.WriteLine("\nHit enter to continue...");
@@ -258,26 +325,33 @@ namespace Assignment3 {
             // Get a stream object for reading and writing
             var stream = _client.GetStream();
 
-            int i;
-
             // Loop to receive all the data sent by the client.
-            while ((i = stream.Read(Bytes, 0, Bytes.Length)) != 0) {
-                // Translate data bytes to a ASCII string.
-                _data = Encoding.ASCII.GetString(Bytes, 0, i);
-                Console.WriteLine("Received: {0}", _data);
+            try
+            {
+                int i;
+                while ((i = stream.Read(Bytes, 0, Bytes.Length)) != 0)
+                {
+                    // Translate data bytes to a ASCII string.
+                    _data = Encoding.ASCII.GetString(Bytes, 0, i);
 
-                // Process the data sent by the client.
-                var r = JsonConvert.DeserializeObject<Request>(_data);
+                    // Process the data sent by the client.
+                    var r = JsonConvert.DeserializeObject<Request>(_data);
 
-                var response = DealWithRequest(r);
+                    var response = DealWithRequest(r);
 
-                // Send back a response.
-                var data = JsonConvert.SerializeObject(response);
-                stream.Write(Encoding.ASCII.GetBytes(data), 0, data.Length);
+                    // Send back a response.
+                    var data = JsonConvert.SerializeObject(response);
+                    Console.WriteLine("Received: {1}\nSent: {0}", data, _data);
+                    stream.Write(Encoding.ASCII.GetBytes(data), 0, data.Length);
+                }
+            }
+            catch (IOException)
+            {
+                
             }
 
             // Shutdown and end connection
-            _client.Close();
+//            _client.Close();
         }
     }
 }
