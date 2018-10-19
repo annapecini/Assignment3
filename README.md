@@ -7,7 +7,7 @@ Collaborators:
 
 - Ana Pecini
 
-- Valter Abreu Da Silva
+- Valter Da Silva Abreu
 
 - Boris Le Meec
 
